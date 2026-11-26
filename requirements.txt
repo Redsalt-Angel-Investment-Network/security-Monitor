@@ -1,0 +1,17 @@
+# Pinned versions = reproducible + auditable builds, a basic supply-chain
+# habit. Bump deliberately, not by accident.
+# These ship prebuilt wheels through Python 3.14, so installing needs no compiler.
+
+# Collector (the API server)
+fastapi==0.162.0
+uvicorn==0.54.0
+pydantic==2.14.1
+
+# Web checker
+certifi==2026.10.23    # Mozilla CA bundle: TLS verdicts match what browsers say
+dnspython==2.8.0       # SPF / DMARC lookups
+
+# Windows endpoint agent only. Not needed to run the collector, and only
+# installs on Windows thanks to the environment marker. Left unpinned so pip
+# picks a build with wheels for your Python version.
+pywin32 ; sys_platform == "win32"

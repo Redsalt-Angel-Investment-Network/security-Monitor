@@ -1,0 +1,43 @@
+# Run the whole monitor on one small server:
+#   python scripts/setup.py          # once: writes .env with fresh keys
+#   docker compose up -d --build
+#   docker compose logs -f collector
+services:
+  collector:
+    build: .
+    env_file: .env
+    environment:
+      SM_DB_PATH: /app/data/events.db
+    volumes:
+      - monitor-data:/app/data
+    # Bound to localhost only. To accept agents from OTHER machines, put the
+    # collector behind a TLS reverse proxy (e.g. Caddy) first - never expose
+    # plain HTTP with API keys to the internet.
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  webcheck:
+    build: .
+    env_file: .env
+    environment:
+      SM_COLLECTOR_URL: http://collector:8000
+      # Only its OWN key: blank out the collector's full key list and the
+      # mail/Slack secrets this container never needs.
+      SM_API_KEY: ${SM_WEBCHECK_KEY:?run scripts/setup.py first}
+      SM_API_KEYS: ""
+      SM_SMTP_PASSWORD: ""
+      SM_SLACK_WEBHOOK_URL: ""
+    command: ["python", "agent/web_checker.py"]
+    depends_on:
+      collector:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  monitor-data:

@@ -1,0 +1,11 @@
+.venv/
+venv/
+data/
+*.db
+.env
+.env.*
+.git/
+.claude/
+__pycache__/
+tests/
+atomic-tests/

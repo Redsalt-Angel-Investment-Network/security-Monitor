@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Local data + secrets must never be committed.
+data/
+*.db
+.env
+
+# Local Claude Code settings
+.claude/settings.local.json
